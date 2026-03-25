@@ -4,15 +4,15 @@ import type { NewsItem } from "@/app/api/news/route";
 import { timeAgo } from "@/components/utils";
 import { TranslatedSnippet } from "@/components/TranslatedSnippet";
 
-const categoryColors: Record<string, { text: string }> = {
-  Tech: { text: "var(--color-accent)" },
-  AI: { text: "var(--color-purple)" },
-  Economics: { text: "var(--color-green)" },
-  Politics: { text: "var(--color-orange)" },
+const categoryColors: Record<string, { bg: string; text: string }> = {
+  Tech: { bg: "rgba(59, 130, 246, 0.15)", text: "#60a5fa" },
+  AI: { bg: "rgba(168, 85, 247, 0.15)", text: "#c084fc" },
+  Economics: { bg: "rgba(34, 197, 94, 0.15)", text: "#4ade80" },
+  Politics: { bg: "rgba(249, 115, 22, 0.15)", text: "#fb923c" },
 };
 
 export function NewsCard({ item }: { item: NewsItem }) {
-  const colors = categoryColors[item.category] || { text: "var(--color-badge-text)" };
+  const colors = categoryColors[item.category] || { bg: "var(--color-badge-bg)", text: "var(--color-badge-text)" };
 
   return (
     <a
@@ -28,7 +28,7 @@ export function NewsCard({ item }: { item: NewsItem }) {
       <div className="flex items-center justify-between mb-3">
         <span
           className="text-xs font-semibold px-2.5 py-1 rounded-full"
-          style={{ backgroundColor: "var(--color-badge-bg)", color: colors.text }}
+          style={{ backgroundColor: colors.bg, color: colors.text }}
         >
           {item.category}
         </span>

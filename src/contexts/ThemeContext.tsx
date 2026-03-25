@@ -26,15 +26,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (mounted) {
       localStorage.setItem("theme", theme);
-      const themeValue = theme === "warm" ? "yellow" : theme;
-      document.documentElement.setAttribute("data-theme", themeValue);
+      document.documentElement.setAttribute("data-theme", theme);
+      // Update dark class for Tailwind compatibility
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
   }, [theme, mounted]);
 
-  if (!mounted) {
-    return null;
-  }
-
+  // Render children immediately with default theme to prevent flash
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
