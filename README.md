@@ -18,6 +18,10 @@
   <img src="https://img.shields.io/badge/deploy-Vercel-black?style=flat-square&logo=vercel" />
 </p>
 
+<p align="center">
+  <img src="./assets/demo.gif" alt="FOMONO Demo" width="800" />
+</p>
+
 ---
 
 ## What is FOMONO?
