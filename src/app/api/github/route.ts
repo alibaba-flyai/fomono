@@ -43,9 +43,14 @@ async function fetchTrendingRepos(): Promise<GitHubRepo[]> {
   const dateStr = weekAgo.toISOString().split("T")[0];
 
   const queries = [
-    `created:>${dateStr}&sort=stars&order=desc&per_page=15`,
-    `topic:ai+created:>${dateStr}&sort=stars&order=desc&per_page=10`,
-    `topic:llm+created:>${dateStr}&sort=stars&order=desc&per_page=10`,
+    // Older repos trending now (pushed recently, high stars)
+    `stars:>50+pushed:>${dateStr}&sort=stars&order=desc&per_page=25`,
+    // Brand new repos gaining traction
+    `created:>${dateStr}&sort=stars&order=desc&per_page=20`,
+    // AI-topic repos active in the last week
+    `topic:ai+pushed:>${dateStr}+stars:>10&sort=stars&order=desc&per_page=20`,
+    // LLM-topic repos active in the last week
+    `topic:llm+pushed:>${dateStr}+stars:>10&sort=stars&order=desc&per_page=20`,
   ];
 
   const results = await Promise.allSettled(
@@ -85,7 +90,7 @@ async function fetchTrendingRepos(): Promise<GitHubRepo[]> {
     }
   }
 
-  return repos.sort((a, b) => b.stars - a.stars).slice(0, 30);
+  return repos.sort((a, b) => b.stars - a.stars).slice(0, 50);
 }
 
 export async function GET() {
