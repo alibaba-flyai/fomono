@@ -94,55 +94,12 @@ async function fetchTrendingRepos(): Promise<GitHubRepo[]> {
 }
 
 export async function GET() {
-  const encoder = new TextEncoder();
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const repos = await fetchTrendingRepos();
-      for (const repo of repos) {
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ ...repo, type: "github" })}\n\n`)
-        );
-      }
-      controller.enqueue(
-        encoder.encode(`data: ${JSON.stringify({ type: "init-complete" })}\n\n`)
-      );
-
-      const interval = setInterval(async () => {
-        try {
-          const fresh = await fetchTrendingRepos();
-          for (const repo of fresh.slice(0, 5)) {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ ...repo, type: "github", isUpdate: true })}\n\n`
-              )
-            );
-          }
-        } catch {
-          // keep going
-        }
-      }, 300000); // 5 minutes
-
-      const heartbeat = setInterval(() => {
-        controller.enqueue(encoder.encode(`: heartbeat\n\n`));
-      }, 15000);
-
-      (controller as unknown as Record<string, () => void>)._cleanup = () => {
-        clearInterval(interval);
-        clearInterval(heartbeat);
-      };
-    },
-    cancel(controller) {
-      const cleanup = (controller as unknown as Record<string, () => void>)._cleanup;
-      if (cleanup) cleanup();
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+  try {
+    const repos = await fetchTrendingRepos();
+    return Response.json(repos.map((r) => ({ ...r, type: "github" })), {
+      headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=600" },
+    });
+  } catch {
+    return Response.json([], { status: 500 });
+  }
 }

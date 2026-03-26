@@ -65,62 +65,17 @@ async function fetchFeed(feed: FeedSource): Promise<NewsItem[]> {
 }
 
 export async function GET() {
-  const encoder = new TextEncoder();
+  try {
+    const allFeeds = await Promise.allSettled(FEEDS.map(fetchFeed));
+    const allItems: NewsItem[] = allFeeds
+      .filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === "fulfilled")
+      .flatMap((r) => r.value)
+      .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      const allFeeds = await Promise.allSettled(FEEDS.map(fetchFeed));
-      const allItems: NewsItem[] = allFeeds
-        .filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === "fulfilled")
-        .flatMap((r) => r.value)
-        .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
-
-      for (const item of allItems) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(item)}\n\n`));
-      }
-      controller.enqueue(
-        encoder.encode(`data: ${JSON.stringify({ type: "init-complete" })}\n\n`)
-      );
-
-      const interval = setInterval(async () => {
-        try {
-          const freshFeeds = await Promise.allSettled(FEEDS.map(fetchFeed));
-          const freshItems: NewsItem[] = freshFeeds
-            .filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === "fulfilled")
-            .flatMap((r) => r.value)
-            .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
-            .slice(0, 5);
-
-          for (const item of freshItems) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ ...item, isUpdate: true })}\n\n`)
-            );
-          }
-        } catch {
-          // keep going
-        }
-      }, 60000);
-
-      const heartbeat = setInterval(() => {
-        controller.enqueue(encoder.encode(`: heartbeat\n\n`));
-      }, 15000);
-
-      (controller as unknown as Record<string, () => void>)._cleanup = () => {
-        clearInterval(interval);
-        clearInterval(heartbeat);
-      };
-    },
-    cancel(controller) {
-      const cleanup = (controller as unknown as Record<string, () => void>)._cleanup;
-      if (cleanup) cleanup();
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    return Response.json(allItems, {
+      headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate=120" },
+    });
+  } catch {
+    return Response.json([], { status: 500 });
+  }
 }

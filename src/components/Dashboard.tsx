@@ -55,49 +55,40 @@ export function Dashboard() {
     setItems((prev) => [...unseen, ...prev].slice(0, 300));
   }, []);
 
-  const connectSSE = useCallback(
-    (
-      url: string,
-      key: "github" | "social" | "news"
-    ) => {
-      const es = new EventSource(url);
-
-      es.onopen = () => setConnected((c) => ({ ...c, [key]: true }));
-
-      es.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === "init-complete") {
-            setLoading((l) => ({ ...l, [key]: false }));
-            return;
-          }
-          addItems([data as FeedItem], !!data.isUpdate);
-        } catch {
-          // ignore
-        }
-      };
-
-      es.onerror = () => {
+  const fetchFeed = useCallback(
+    async (url: string, key: "github" | "social" | "news", isUpdate: boolean) => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("fetch failed");
+        const data: FeedItem[] = await res.json();
+        setConnected((c) => ({ ...c, [key]: true }));
+        addItems(data, isUpdate);
+      } catch {
         setConnected((c) => ({ ...c, [key]: false }));
-        es.close();
-        setTimeout(() => connectSSE(url, key), 5000);
-      };
-
-      return es;
+      } finally {
+        setLoading((l) => ({ ...l, [key]: false }));
+      }
     },
     [addItems]
   );
 
   useEffect(() => {
-    const es1 = connectSSE("/api/github", "github");
-    const es2 = connectSSE("/api/social", "social");
-    const es3 = connectSSE("/api/news", "news");
+    // Initial fetch for all feeds
+    fetchFeed("/api/github", "github", false);
+    fetchFeed("/api/social", "social", false);
+    fetchFeed("/api/news", "news", false);
+
+    // Poll for updates: github every 5min, social every 2min, news every 1min
+    const ghInterval = setInterval(() => fetchFeed("/api/github", "github", true), 300000);
+    const socialInterval = setInterval(() => fetchFeed("/api/social", "social", true), 120000);
+    const newsInterval = setInterval(() => fetchFeed("/api/news", "news", true), 60000);
+
     return () => {
-      es1.close();
-      es2.close();
-      es3.close();
+      clearInterval(ghInterval);
+      clearInterval(socialInterval);
+      clearInterval(newsInterval);
     };
-  }, [connectSSE]);
+  }, [fetchFeed]);
 
   const isAnyConnected = connected.github || connected.social || connected.news;
   const isLoading = loading.github && loading.social && loading.news;
