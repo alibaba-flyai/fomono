@@ -38,19 +38,22 @@ if (process.env.GITHUB_TOKEN) {
 }
 
 async function fetchTrendingRepos(): Promise<GitHubRepo[]> {
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const dateStr = weekAgo.toISOString().split("T")[0];
+  const daysAgo = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.toISOString().split("T")[0];
+  };
 
   const queries = [
-    // Older repos trending now (pushed recently, high stars)
-    `stars:>50+pushed:>${dateStr}&sort=stars&order=desc&per_page=25`,
-    // Brand new repos gaining traction
-    `created:>${dateStr}&sort=stars&order=desc&per_page=20`,
-    // AI-topic repos active in the last week
-    `topic:ai+pushed:>${dateStr}+stars:>10&sort=stars&order=desc&per_page=20`,
-    // LLM-topic repos active in the last week
-    `topic:llm+pushed:>${dateStr}+stars:>10&sort=stars&order=desc&per_page=20`,
+    // Fast risers: created in last 7 days, sorted by stars (these are truly new & hot)
+    `created:>${daysAgo(7)}&sort=stars&order=desc&per_page=20`,
+    // Fast risers: created in last 30 days, already 100+ stars (growing fast)
+    `created:>${daysAgo(30)}+stars:>100&sort=stars&order=desc&per_page=20`,
+    // Fast risers: created in last 90 days, 500+ stars (breakout projects)
+    `created:>${daysAgo(90)}+stars:>500&sort=stars&order=desc&per_page=15`,
+    // AI/LLM fast risers: created in last 30 days
+    `topic:ai+created:>${daysAgo(30)}+stars:>50&sort=stars&order=desc&per_page=15`,
+    `topic:llm+created:>${daysAgo(30)}+stars:>50&sort=stars&order=desc&per_page=15`,
   ];
 
   const results = await Promise.allSettled(
