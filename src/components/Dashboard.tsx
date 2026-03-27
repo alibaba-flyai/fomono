@@ -5,6 +5,7 @@ import { GitHubCard } from "@/components/GitHubCard";
 import { SocialCard } from "@/components/SocialCard";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryTabs } from "@/components/CategoryTabs";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { GitHubRepo } from "@/app/api/github/route";
 import type { SocialPost } from "@/app/api/social/route";
 import type { NewsItem } from "@/app/api/news/route";
@@ -108,7 +109,7 @@ export function Dashboard() {
       <header
         className="sticky top-0 z-50 backdrop-blur-md border-b"
         style={{
-          backgroundColor: "rgba(10, 10, 18, 0.85)",
+          backgroundColor: "var(--color-header-bg)",
           borderColor: "var(--color-card-border)",
         }}
       >
@@ -153,6 +154,7 @@ export function Dashboard() {
               <span className={`w-1.5 h-1.5 rounded-full ml-2 ${connected.news ? "bg-green-500" : "bg-zinc-600"}`} />
               News
             </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>

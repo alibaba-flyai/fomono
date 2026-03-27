@@ -40,7 +40,7 @@ export function TranslatedSnippet({ text }: { text: string }) {
   return (
     <p
       className="text-xs leading-relaxed line-clamp-2"
-      style={{ color: "#5eead4" }}
+      style={{ color: "var(--color-cyan)" }}
     >
       🇨🇳 {translated}
     </p>

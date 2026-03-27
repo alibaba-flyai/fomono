@@ -54,7 +54,7 @@ export function GitHubCard({ item }: { item: GitHubRepo }) {
         </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ml-2"
-          style={{ backgroundColor: "#1a1a2e", color: "var(--color-orange)" }}
+          style={{ backgroundColor: "var(--color-badge-github-bg)", color: "var(--color-badge-github-text)" }}
         >
           GitHub
         </span>
@@ -101,8 +101,8 @@ export function GitHubCard({ item }: { item: GitHubRepo }) {
               key={topic}
               className="text-xs px-2 py-0.5 rounded-full"
               style={{
-                backgroundColor: "rgba(59, 130, 246, 0.1)",
-                color: "var(--color-accent)",
+                backgroundColor: "var(--color-tag-bg)",
+                color: "var(--color-tag-text)",
               }}
             >
               {topic}

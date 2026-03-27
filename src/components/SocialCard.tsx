@@ -29,7 +29,7 @@ export function SocialCard({ item }: { item: SocialPost }) {
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
             style={{
-              backgroundColor: "rgba(168, 85, 247, 0.15)",
+              backgroundColor: "var(--color-badge-bg)",
               color: "var(--color-purple)",
             }}
           >
@@ -46,7 +46,7 @@ export function SocialCard({ item }: { item: SocialPost }) {
         </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: "rgba(168, 85, 247, 0.1)", color: platform.color }}
+          style={{ backgroundColor: "var(--color-badge-bg)", color: platform.color }}
         >
           {platform.label}
         </span>
@@ -66,7 +66,7 @@ export function SocialCard({ item }: { item: SocialPost }) {
         <span
           className="text-xs px-2 py-0.5 rounded-full"
           style={{
-            backgroundColor: "rgba(34, 197, 94, 0.1)",
+            backgroundColor: "var(--color-badge-bg)",
             color: "var(--color-green)",
           }}
         >
