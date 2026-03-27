@@ -114,9 +114,9 @@ export function Dashboard() {
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="text-2xl font-bold" style={{ color: "var(--color-foreground)" }}>
+            <a href="/" className="text-2xl font-bold no-underline" style={{ color: "var(--color-foreground)", textDecoration: "none" }}>
               <span style={{ color: "var(--color-accent)" }}>FOMO</span>NO
-            </div>
+            </a>
             <div className="flex items-center gap-1.5 ml-3">
               <span
                 className="inline-block w-2 h-2 rounded-full animate-pulse-live"
